@@ -1,0 +1,27 @@
+[
+    {
+    "titulo": "Estudar Python",
+    "descricao": "Revisar funções, listas e dicionários.",
+    "concluida": false
+    },
+
+    {
+    "titulo": "Criar API com FastAPI",
+    "descricao": "Implementar os endpoints GET, POST, PUT e DELETE.",
+    "concluida": false
+    },
+
+    {
+    "titulo": "Integrar SQLite",
+    "descricao": "Persistir as tarefas em um banco de dados.",
+    "concluida": true
+    },
+    {
+    "titulo": "Testar a API",
+    "descricao": "Validar os endpoints utilizando o Swagger.",
+    "concluida": false
+    }
+
+
+]
+
