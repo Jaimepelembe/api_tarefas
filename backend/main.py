@@ -4,36 +4,21 @@ import sqlite3
 from fastapi import FastAPI, HTTPException
 
 from pydantic import BaseModel # Serve para definir o formato dos dados recebidos e enviados nas requisições HTTP
+#Modelo de dados
+from tarefa import Tarefa
 
 #Ajudar na tipagem
 from typing import List, Optional
+
+from base_dados.gestorBD import GestorBD
 
 
 #Criar a API
 app = FastAPI(title="API de Tarefas")
 
-
-
-#Modelo de dados
-#O Pydantic permite validar automaticamente os dados recebidos nas requisições.
-class Tarefa(BaseModel):
-        id: Optional[int]=None
-        titulo:str
-        descricao:str
-        concluida:bool=False
-
-
-#Base de dados
-baseDados=Path(__file__).with_name("tarefas.db")
-
-def Conectar():
-    conexao=sqlite3.connect(baseDados,timeout=100)
-    conexao.row_factory=sqlite3.Row
-    return conexao
-
 #Base de dados em memoria
 db_tarefas=[ ]
-
+gestorBD=GestorBD()
 
 #Criação das rotas: Endpoints
 
@@ -46,7 +31,8 @@ async def paginaInicial():
 @app.get("/tarefas", response_model=List[Tarefa])
 async def listarTarefas():
     """Retorna a lista de todas as tarefas"""
-    return db_tarefas
+    return gestorBD.buscarTodasTarefas()
+    #return db_tarefas
 
 
 #Rota para buscar a tarefa por ID
@@ -54,10 +40,11 @@ async def listarTarefas():
 async def buscarTarefaPorID(id_tarefa:int):
     """Retorna uma tarefa pelo seu ID"""
     if id_tarefa>0:
-        for tarefa in db_tarefas:
-            if tarefa.id == id_tarefa:
-                return tarefa
-        raise HTTPException(status_code=404, detail="Tarefa não encontrada.")
+        tarefa= gestorBD.buscarTarefaPorID(id_tarefa)
+        if tarefa ==None:
+            raise HTTPException(status_code=404, detail="Tarefa não encontrada.")
+        else:
+            return tarefa
     else:
         raise HTTPException(status_code=404, detail="Voce digitou um ID incorrecto.")
 
@@ -66,21 +53,19 @@ async def buscarTarefaPorID(id_tarefa:int):
 @app.post("/tarefas", response_model=Tarefa,status_code=201)
 async def criarTarefa(tarefa:Tarefa):
     """Cria uma nova tarefa"""
-    tarefa.id=len(db_tarefas)+1
-    db_tarefas.append(tarefa)
+    tarefa=gestorBD.criarTarefa(tarefa)
     return tarefa
 
 #Rota para actualizar uma tarefa
 @app.put("/tarefas/{id_tarefa}",response_model=Tarefa, status_code=200)
-async def actualizarTarefa(id_tarefa:int,tarefaActualizada:Tarefa):
+async def editarTarefa(id_tarefa:int,tarefaActualizada:Tarefa):
     """Actualiza os dados de uma tarefa"""
     if id_tarefa >0:
-        for indice,tarefaAntiga in enumerate(db_tarefas):
-            if tarefaAntiga.id == id_tarefa:
-                tarefaActualizada.id=id_tarefa
-                db_tarefas[indice]=tarefaActualizada
-                return tarefaActualizada
-        raise HTTPException(status_code=404, detail="Tarefa nao encontrada")
+        tarefa=gestorBD.editarTarefa(tarefaActualizada)
+        if tarefa!=None:
+            return tarefa
+        else:
+            raise HTTPException(status_code=404, detail="Tarefa nao encontrada")
     
     else:
         raise HTTPException(status_code=404, detail="Voce digitou um ID incorrecto.")
