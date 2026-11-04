@@ -25,8 +25,6 @@ class GestorBD:
         except Exception as e:
             print("Erro ao conectar a base de dados: {e}")
         
-
-
     def criarTabela(self):
         """Cria a tabela de tarefa, caso ela não exista"""
         conexao= self.conectar()
@@ -46,7 +44,6 @@ class GestorBD:
         
         finally:
             conexao.close()
-        
         
         
     def inserirDadosExemplo(self):
@@ -162,8 +159,32 @@ class GestorBD:
         
         finally:
             conexao.close()      
-   
      
+    def deletarTarefa(self,id_tarefa)->str:
+        """Deleta uma tarefa"""
+        conexao= self.conectar()  
+        try:  
+        
+            cursor=conexao.cursor()
+            comandoSql="DELETE FROM tarefa WHERE id=?"
+            dadosTarefa=(id_tarefa,)
+            cursor.execute(comandoSql,dadosTarefa)
+            conexao.commit()
+            
+            if cursor.rowcount>0:
+                return "Tarefa deletada com sucesso."
+            else:
+                return None
+        
+        except sqlite3.IntegrityError as e:
+            print(f"Erro de integridade: {e}")
+        except sqlite3.OperationalError as e:
+            print(f"Erro operacional: {e}")
+        except sqlite3.Error as e:
+            print(f"Erro geral do SQLite: {e}")
+        
+        finally:
+            conexao.close()  
     
 """
 gestor=GestorBD()

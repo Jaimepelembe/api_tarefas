@@ -61,7 +61,7 @@ async def criarTarefa(tarefa:Tarefa):
 async def editarTarefa(id_tarefa:int,tarefaActualizada:Tarefa):
     """Actualiza os dados de uma tarefa"""
     if id_tarefa >0:
-        tarefa=gestorBD.editarTarefa(tarefaActualizada)
+        tarefa=gestorBD.editarTarefa(id_tarefa,tarefaActualizada)
         if tarefa!=None:
             return tarefa
         else:
@@ -76,12 +76,11 @@ async def editarTarefa(id_tarefa:int,tarefaActualizada:Tarefa):
 async def deletarTarefa(id_tarefa:int):
     """Deleta uma tarefa"""
     if id_tarefa >0:
-        for tarefa in db_tarefas:
-            if tarefa.id== id_tarefa:
-                db_tarefas.remove(tarefa)
-                return "Tarefa deletada com sucesso."
-                    
-        raise HTTPException(status_code=404, detail="Tarefa nao encontrada")
+        mensagem=gestorBD.deletarTarefa(id_tarefa)
+        if mensagem!=None:
+            return mensagem
+        else:               
+            raise HTTPException(status_code=404, detail="Tarefa nao foi apagada")
     
     else:
         raise HTTPException(status_code=404, detail="Voce digitou um ID incorrecto.")
